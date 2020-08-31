@@ -21,5 +21,4 @@ class ReservationAdmin(admin.ModelAdmin):
 
     list_filter = (
         "status",
-        "in_progress",
     )
