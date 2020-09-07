@@ -72,19 +72,19 @@ def search(request):
         filter_args["room_type__pk__exact"] = room_type
 
     if price != 0:
-        filter_args["price_lt"] = price
+        filter_args["price__lte"] = price
 
     if guests != 0:
-        filter_args["guests_gte"] = guests
+        filter_args["guests__gte"] = guests
 
     if bedrooms != 0:
-        filter_args["bedrooms_gte"] = bedrooms
+        filter_args["bedrooms__gte"] = bedrooms
 
     if beds != 0:
-        filter_args["beds_gte"] = beds
+        filter_args["beds__gte"] = beds
 
     if baths != 0:
-        filter_args["baths_gte"] = baths
+        filter_args["baths__gte"] = baths
 
     if instant is True:
         filter_args["instant_book"] = True
