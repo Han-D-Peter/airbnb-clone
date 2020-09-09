@@ -35,4 +35,5 @@ class SignUpView(FormView):
 
     def form_valid(self, form):
         form.save()
+        user.verify_email()
         return super().form_valid(form)
