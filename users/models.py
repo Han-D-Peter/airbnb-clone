@@ -71,6 +71,7 @@ class User(AbstractUser):
                 settings.EMAIL_FROM,
                 [self.email],
                 fail_silently=False,
+                html_message=html_message,
             )
             self.save()
         return
