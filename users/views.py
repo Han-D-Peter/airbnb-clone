@@ -1,6 +1,7 @@
 import os
 import requests
-from django.views.generic import FormView
+from django.contrib.auth.views import PasswordChangeView
+from django.views.generic import FormView, DetailView, UpdateView
 from django.urls import reverse_lazy
 from django.shortcuts import redirect, reverse
 from django.contrib.auth import authenticate, login, logout
@@ -159,6 +160,7 @@ def kakao_callback(request):
             "https://kapi.kakao.com/v1/user/me",
             headers={"Authorization": f"Bearer {access_token}"},
         )
+        print(profile_request)
         profile_json = profile_request.json()
         email = profile_json.get("kaccount_email", None)
         if email is None:
@@ -191,3 +193,41 @@ def kakao_callback(request):
     except KakaoException as e:
         messages.error(request, e)
         return redirect(reverse("users:login"))
+
+
+class UserProfileView(DetailView):
+
+    model = models.User
+    context_object_name = "user_obj"
+
+
+class UpdateProfileView(UpdateView):
+
+    model = models.User
+    template_name = "users/update-profile.html"
+    fields = (
+        "email",
+        "username",
+        "first_name",
+        "last_name",
+        "avatar",
+        "gender",
+        "bio",
+        "birthdate",
+        "language",
+        "currency",
+    )
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def form_valid(self, form):
+        email = form.cleaned_data.get("email")
+        self.object.username = email
+        self.object.save()
+        return super().form_valid(form)
+
+
+class UpdatePasswordView(PasswordChangeView):
+
+    template_name = "users/update-password.html"
