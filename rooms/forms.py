@@ -62,7 +62,7 @@ class CreateRoomForm(forms.ModelForm):
             "facilities",
             "house_rules",
         )
-    
+
     def save(self, *args, **kwargs):
         room = super().save(commit=False)
         return room
