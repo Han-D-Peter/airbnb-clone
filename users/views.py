@@ -1,5 +1,7 @@
 import os
 import requests
+from django.utils import translation
+from django.http import HttpResponse
 from django.contrib.auth.views import PasswordChangeView
 from django.views.generic import FormView, DetailView, UpdateView
 from django.urls import reverse_lazy
@@ -26,7 +28,7 @@ class LoginView(mixins.LoggedOutOnlyView, FormView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        next_arg = self.request.GET.get('next')
+        next_arg = self.request.GET.get("next")
         if next_arg is not None:
             return next_arg
         else:
@@ -240,7 +242,12 @@ class UpdateProfileView(mixins.LoggedInOnlyView, SuccessMessageMixin, UpdateView
         return form
 
 
-class UpdatePasswordView(mixins.EmailLoginOnlyView, mixins.LoggedInOnlyView, SuccessMessageMixin, PasswordChangeView):
+class UpdatePasswordView(
+    mixins.EmailLoginOnlyView,
+    mixins.LoggedInOnlyView,
+    SuccessMessageMixin,
+    PasswordChangeView,
+):
 
     template_name = "users/update-password.html"
     success_message = "Password Updated"
@@ -265,3 +272,10 @@ def switch_hosting(request):
     except KeyError:
         request.session["is_hosting"] = True
     return redirect(reverse("core:home"))
+
+
+def switch_language(request):
+    lang = request.GET.get("lang", None)
+    if lang is not None:
+        request.session[translation.LANGUAGE_SESSION_KEY] = lang
+    return HttpResponse(status=200)
