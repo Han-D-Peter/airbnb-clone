@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,10 +22,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("DJANGO_SECRET")
+SECRET_KEY = os.environ.get("DJANGO_SECRET", "YRL44phBrG4ZEQN#6x@Ytb12uHvSmHK")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(os.environ.get("DEBUG"))
 
 ALLOWED_HOSTS = [".elasticbeanstalk.com"]
 
@@ -39,7 +41,7 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
 ]
 
-THIRD_PARTY_APPS = ["django_countries", "django_seed"]
+THIRD_PARTY_APPS = ["django_countries", "django_seed", "storages"]
 
 PROJECT_APPS = [
     "core.apps.CoreConfig",
@@ -167,3 +169,28 @@ LOGIN_URL = "/users/login/"
 
 LOCALE_PATHS = (os.path.join(BASE_DIR, "locale"),)
 
+# Sentry
+
+if not DEBUG:
+
+    DEFAULT_FILE_STORAGE = "config.custom_storages.UploadStorage"
+    STATICFILES_STORAGE = "config.custom_storages.StaticStorage"
+    AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = "airbnb-clone-peterpeterpet"
+    AWS_AUTO_CREATE_BUCKET = True
+    AWS_BUCKET_ACL = "public-read"
+    AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "max-age=86400"}
+    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+    STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static"
+
+    sentry_sdk.init(
+        dsn=os.environ.get("SENTRY_URL"),
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=1.0,
+        # If you wish to associate users to errors (assuming you are using
+        # django.contrib.auth) you may enable sending PII data.
+        send_default_pii=True,
+    )
+
+# https://553110597d0e4ccda1fab6a2d0451baa@o457528.ingest.sentry.io/5453624
